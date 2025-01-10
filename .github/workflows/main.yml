@@ -1,0 +1,49 @@
+name: Deploy Azure VM with RDP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-rdp-vm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create Azure Resource Group
+        run: |
+          az group create --name MyResourceGroup --location eastus
+
+      - name: Create Azure VM
+        run: |
+          az vm create \
+            --resource-group MyResourceGroup \
+            --name MyRDPMachine \
+            --image Win2022Datacenter \
+            --admin-username azureuser \
+            --admin-password MyComplexPassword123! \
+            --size Standard_B1s
+
+      - name: Open RDP Port (3389)
+        run: |
+          az vm open-port \
+            --resource-group MyResourceGroup \
+            --name MyRDPMachine \
+            --port 3389
+
+      - name: Get Public IP Address
+        run: |
+          az vm show \
+            --resource-group MyResourceGroup \
+            --name MyRDPMachine \
+            --show-details \
+            --query publicIps \
+            --output tsv
