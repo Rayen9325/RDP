@@ -1,49 +1,22 @@
-name: Deploy Azure VM with RDP
+name: Programmingwithkumaresan
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  deploy-rdp-vm:
-    runs-on: ubuntu-latest
-
+  build:
+    name: Start Building...
+    runs-on: windows-latest
+    timeout-minutes: 9999
+    
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Create Azure Resource Group
+      - name: Downloading & Installing Essentials
         run: |
-          az group create --name MyResourceGroup --location eastus
+          Invoke-WebRequest -Uri "https://gitlab.com/chamod12/lm_win-10_github_rdp/-/raw/main/Downloads.bat" -OutFile "Downloads.bat"
+          cmd /c Downloads.bat
 
-      - name: Create Azure VM
-        run: |
-          az vm create \
-            --resource-group MyResourceGroup \
-            --name MyRDPMachine \
-            --image Win2022Datacenter \
-            --admin-username azureuser \
-            --admin-password MyComplexPassword123! \
-            --size Standard_B1s
+      - name: Connect to LiteManager
+        run: cmd /c show.bat
 
-      - name: Open RDP Port (3389)
-        run: |
-          az vm open-port \
-            --resource-group MyResourceGroup \
-            --name MyRDPMachine \
-            --port 3389
-
-      - name: Get Public IP Address
-        run: |
-          az vm show \
-            --resource-group MyResourceGroup \
-            --name MyRDPMachine \
-            --show-details \
-            --query publicIps \
-            --output tsv
+      - name: Time Counter
+        run: cmd /c loop.bat
